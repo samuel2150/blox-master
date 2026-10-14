@@ -1,398 +1,317 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BLOX MASTER | Command Center</title>
-
 <style>
 :root {
-  --bg: #07100e;
-  --panel: #101c18;
-  --border: #284638;
-  --green: #4dff9a;
-  --text: #eafff1;
-  --muted: #9ab5a5;
-  --red: #ff7272;
-  --yellow: #ffd166;
+  --bg:#07100e; --panel:#101c18; --border:#284638;
+  --green:#4dff9a; --text:#eafff1; --muted:#9ab5a5;
+  --red:#ff7272; --yellow:#ffd166;
 }
-
-* {
-  box-sizing: border-box;
-}
-
+* { box-sizing:border-box; }
 body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Arial, Helvetica, sans-serif;
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
 }
-
 header {
-  padding: 24px;
-  background: #0b1712;
-  border-bottom: 1px solid var(--border);
+  padding:24px; background:#0b1712;
+  border-bottom:1px solid var(--border);
 }
-
-h1 {
-  margin: 0;
-  color: var(--green);
-  letter-spacing: 3px;
-  font-size: 32px;
+h1 { margin:0; color:var(--green); letter-spacing:3px; }
+.subtitle,.hint,footer { color:var(--muted); }
+.subtitle { margin-top:8px; }
+main { max-width:1200px; margin:auto; padding:20px; }
+.toolbar,.row {
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
 }
-
-.subtitle {
-  color: var(--muted);
-  margin-top: 8px;
+.toolbar { margin:18px 0; }
+button,input {
+  padding:12px; border-radius:8px;
+  border:1px solid var(--border); font:inherit;
 }
-
-main {
-  max-width: 1200px;
-  margin: auto;
-  padding: 20px;
-}
-
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 18px 0;
-}
-
-button,
-input {
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  font: inherit;
-}
-
 button {
-  background: var(--green);
-  color: #06110a;
-  font-weight: bold;
-  cursor: pointer;
+  background:var(--green); color:#06110a;
+  font-weight:bold; cursor:pointer;
 }
-
-button:hover {
-  filter: brightness(1.12);
-}
-
-input {
-  background: #09130f;
-  color: var(--text);
-  min-width: 0;
-}
-
+button:disabled { opacity:.55; cursor:wait; }
+button:hover:not(:disabled) { filter:brightness(1.12); }
+input { background:#09130f; color:var(--text); min-width:0; }
+.row input { flex:1; }
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
 }
-
 .card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 18px;
-  margin-bottom: 14px;
-  min-width: 0;
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:12px; padding:18px; margin-bottom:14px; min-width:0;
 }
-
 .label {
-  color: var(--muted);
-  font-size: 12px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  color:var(--muted); font-size:12px; letter-spacing:1px;
+  text-transform:uppercase;
 }
-
 .value {
-  font-size: 28px;
-  font-weight: bold;
-  margin: 12px 0;
-  overflow-wrap: anywhere;
+  font-size:25px; font-weight:bold; margin:12px 0;
+  overflow-wrap:anywhere;
 }
-
-.hint {
-  color: var(--muted);
-  font-size: 12px;
-  overflow-wrap: anywhere;
-}
-
-h2 {
-  color: var(--green);
-  font-size: 18px;
-  margin-top: 0;
-}
-
-.section {
-  margin-top: 22px;
-}
-
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.row input {
-  flex: 1;
-}
-
-.status {
-  color: var(--yellow);
-}
-
+.hint { font-size:12px; overflow-wrap:anywhere; }
+h2 { color:var(--green); font-size:18px; margin-top:0; }
+.section { margin-top:22px; }
+.status { color:var(--yellow); }
 .log {
-  background: #050a08;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
-  font-family: Consolas, monospace;
-  font-size: 12px;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  max-height: 250px;
-  overflow: auto;
+  background:#050a08; border:1px solid var(--border);
+  border-radius:8px; padding:12px; font-family:Consolas,monospace;
+  font-size:12px; white-space:pre-wrap; overflow-wrap:anywhere;
+  max-height:250px; overflow:auto;
 }
-
-footer {
-  color: var(--muted);
-  font-size: 12px;
-  padding: 20px 0;
-}
+a { color:var(--green); }
+footer { font-size:12px; padding:20px 0; }
+.demo { border-color:var(--yellow); }
 </style>
 </head>
-
 <body>
-
 <header>
   <h1>BLOX MASTER</h1>
-  <div class="subtitle">
-    ROBLOX INTELLIGENCE SYSTEM • Blox Fruits
-  </div>
+  <div class="subtitle">ROBLOX INTELLIGENCE SYSTEM • BLOX FRUITS</div>
 </header>
 
 <main>
-
   <div class="toolbar">
-    <button id="refreshButton">
-      ATUALIZAR DADOS
-    </button>
-
-    <button id="demoButton">
-      MODO DEMO
-    </button>
-
-    <span id="updateTime" class="hint">
-      Painel iniciado
-    </span>
+    <button id="refreshButton">VERIFICAR CONEXÕES</button>
+    <button id="demoButton">MODO DEMO</button>
+    <span id="updateTime" class="hint">Sistema iniciado</span>
   </div>
 
   <div class="grid">
-
     <div class="card">
       <div class="label">Jogadores online</div>
-      <div class="value" id="players">Carregando...</div>
-      <div class="hint" id="playersHint">
-        Fonte: Roblox
-      </div>
+      <div class="value" id="players">Não consultado</div>
+      <div class="hint" id="playersHint">Aguardando integração</div>
     </div>
-
     <div class="card">
       <div class="label">Visitas totais</div>
-      <div class="value" id="visits">Carregando...</div>
-      <div class="hint">Visitas públicas do jogo</div>
+      <div class="value" id="visits">Não consultado</div>
+      <div class="hint">Estatística pública do jogo</div>
     </div>
-
     <div class="card">
       <div class="label">Máximo por servidor</div>
-      <div class="value" id="maxPlayers">Carregando...</div>
+      <div class="value" id="maxPlayers">Não consultado</div>
       <div class="hint">Capacidade informada pela API</div>
     </div>
-
     <div class="card">
       <div class="label">Latência HTTP</div>
-      <div class="value" id="latency">Aguardando...</div>
-      <div class="hint">Não representa o ping dentro do jogo</div>
+      <div class="value" id="latency">Indisponível</div>
+      <div class="hint">Não é o ping dentro do jogo</div>
     </div>
-
     <div class="card">
       <div class="label">Status do Roblox</div>
-      <div class="value status" id="platformStatus">
-        Consultando...
-      </div>
+      <div class="value status" id="platformStatus">Não verificado</div>
       <div class="hint" id="statusHint">
-        Fonte oficial
+        <a href="https://status.roblox.com/" target="_blank" rel="noopener">Abrir status oficial do Roblox</a>
       </div>
     </div>
-
     <div class="card">
       <div class="label">Nome do jogo</div>
-      <div class="value" id="gameName" style="font-size:20px">
-        Blox Fruits
-      </div>
+      <div class="value" id="gameName" style="font-size:20px">Blox Fruits</div>
       <div class="hint">Universe ID: 994732206</div>
     </div>
-
   </div>
 
   <section class="section card">
     <h2>FRUTAS E STOCK</h2>
-
-    <p class="hint">
-      Configure uma API compatível na próxima etapa
-      para consultar os dados disponíveis.
-    </p>
-
+    <p class="hint">Informe uma API HTTPS que permita consultas pelo navegador (CORS habilitado) e siga os caminhos abaixo.</p>
     <div class="row">
-      <input id="fruitApi"
-        placeholder="URL base da API de frutas">
-
-      <input id="fruitName"
-        placeholder="Nome da fruta, ex.: kitsune">
-
-      <button id="fruitButton">
-        CONSULTAR
-      </button>
+      <input id="fruitApi" placeholder="URL base da API HTTPS">
+      <input id="fruitName" placeholder="Nome da fruta, ex.: kitsune">
+      <button id="fruitButton">CONSULTAR</button>
     </div>
-
     <div class="grid section">
-      <div>
-        <div class="label">Stock</div>
-        <div class="value" id="fruitStock">Aguardando</div>
-      </div>
-
-      <div>
-        <div class="label">Informações da fruta</div>
-        <div class="value" id="fruitInfo">Aguardando</div>
-      </div>
+      <div><div class="label">Stock</div><div class="value" id="fruitStock">Não consultado</div></div>
+      <div><div class="label">Informações da fruta</div><div class="value" id="fruitInfo">Não consultado</div></div>
     </div>
-
-    <div class="hint" id="fruitHint">
-      Nenhuma API conectada.
-    </div>
+    <div class="hint" id="fruitHint">Nenhuma API configurada.</div>
   </section>
 
   <section class="section card">
     <h2>PERFIL PÚBLICO ROBLOX</h2>
-
     <div class="row">
-      <input id="username"
-        placeholder="Nome de usuário Roblox">
-
-      <button id="profileButton">
-        PESQUISAR
-      </button>
+      <input id="username" placeholder="Nome de usuário Roblox">
+      <button id="profileButton">PESQUISAR</button>
     </div>
-
-    <p id="profileResult" class="hint">
-      Nenhum perfil consultado.
-    </p>
+    <p id="profileResult" class="hint">Nenhum perfil consultado. A pesquisa direta depende de uma API acessível pelo navegador.</p>
   </section>
 
   <section class="section card">
     <h2>REGISTRO DE EVENTOS</h2>
-
     <div class="log" id="eventLog">[SISTEMA] BLOX MASTER iniciado.
-[INFO] Aguardando integração com as fontes de dados.</div>
+[INFO] Nenhum dado real foi inventado.</div>
   </section>
 
-  <footer>
-    BLOX MASTER • Painel independente de monitoramento.
-    Dados indisponíveis não serão substituídos por números fictícios.
-  </footer>
-
+  <footer>BLOX MASTER • Painel independente. Modo DEMO usa somente dados ilustrativos identificados como demonstração.</footer>
 </main>
-</body>
-</html>
 
+<script>
+"use strict";
 
+const $ = id => document.getElementById(id);
+let modoDemo = false;
 
-</body>
-</html>
+function registrar(mensagem) {
+  const log = $("eventLog");
+  const hora = new Date().toLocaleTimeString("pt-BR");
+  log.textContent += "\n[" + hora + "] " + mensagem;
+  log.scrollTop = log.scrollHeight;
+}
 
+function numero(valor) {
+  return Number(valor).toLocaleString("pt-BR");
+}
+
+async function consultarJSON(url, opcoes = {}) {
+  const inicio = performance.now();
+  const resposta = await fetch(url, {...opcoes, cache:"no-store"});
+  const latencia = Math.round(performance.now() - inicio);
+  if (!resposta.ok) throw new Error("HTTP " + resposta.status);
+  return {dados:await resposta.json(), latencia};
+}
+
+function limparDemo() {
+  modoDemo = false;
+  $("players").textContent = "Não consultado";
+  $("visits").textContent = "Não consultado";
+  $("maxPlayers").textContent = "Não consultado";
+  $("latency").textContent = "Indisponível";
+  $("platformStatus").textContent = "Não verificado";
+  $("gameName").textContent = "Blox Fruits";
+  $("playersHint").textContent = "Aguardando integração";
+}
+
+async function atualizarJogo() {
+  if (modoDemo) limparDemo();
+
+  $("refreshButton").disabled = true;
+  $("updateTime").textContent = "Verificando conexões...";
+  registrar("Verificação iniciada. Nenhum valor será inventado.");
+
+  try {
+    const resultado = await consultarJSON(
+      "https://games.roblox.com/v1/games?universeIds=994732206"
+    );
+    const jogo = resultado.dados.data?.[0];
+    if (!jogo) throw new Error("A API não retornou dados do jogo.");
+
+    $("players").textContent = numero(jogo.playing);
+    $("visits").textContent = numero(jogo.visits);
+    $("maxPlayers").textContent = numero(jogo.maxPlayers);
+    $("latency").textContent = resultado.latencia + " ms";
+    $("gameName").textContent = jogo.name || "Blox Fruits";
+    $("playersHint").textContent = "Consulta real concluída.";
+    registrar("API de jogos respondeu com sucesso.");
+  } catch (erro) {
+    $("players").textContent = "Indisponível";
+    $("visits").textContent = "Indisponível";
+    $("maxPlayers").textContent = "Indisponível";
+    $("latency").textContent = "Indisponível";
+    $("playersHint").textContent =
+      "A consulta direta pode estar bloqueada por CORS.";
+    registrar("API de jogos indisponível no navegador: " + erro.message);
+  }
+
+  $("platformStatus").textContent = "Consulte a fonte oficial";
+  $("statusHint").innerHTML =
+    '<a href="https://status.roblox.com/" target="_blank" rel="noopener">Abrir status oficial do Roblox</a>';
+  $("updateTime").textContent =
+    "Verificação concluída • " + new Date().toLocaleString("pt-BR");
+  $("refreshButton").disabled = false;
+}
+
+function ativarDemo() {
+  modoDemo = true;
+  $("players").textContent = "DEMO";
+  $("visits").textContent = "DEMO";
+  $("maxPlayers").textContent = "DEMO";
+  $("latency").textContent = "DEMO";
+  $("platformStatus").textContent = "DEMO";
+  $("gameName").textContent = "Blox Fruits (DEMO)";
+  $("playersHint").textContent = "Valor ilustrativo, não é dado real.";
+  $("statusHint").textContent = "Modo de demonstração";
+  $("updateTime").textContent = "MODO DEMO • " + new Date().toLocaleString("pt-BR");
+  registrar("Modo DEMO ativado. Os valores são ilustrativos.");
+}
+
+async function consultarPerfil() {
+  const nome = $("username").value.trim();
+  const saida = $("profileResult");
+  if (!nome) {
+    saida.textContent = "Digite um nome de usuário.";
+    return;
+  }
+
+  saida.textContent =
+    "A pesquisa direta de perfil exige uma integração intermediária compatível com a API do Roblox.";
+  registrar("Perfil @" + nome + " não consultado: integração intermediária necessária.");
+}
 
 async function consultarFrutas() {
   const base = $("fruitApi").value.trim().replace(/\/+$/, "");
   const fruta = $("fruitName").value.trim().toLowerCase();
 
-  if (!base) {
-    $("fruitHint").textContent =
-      "Configure primeiro a URL de uma API de frutas compatível.";
-
-    registrar("Frutas: nenhuma API configurada.");
-    return;
-  }
-
-  if (!base.startsWith("https://")) {
-    $("fruitHint").textContent =
-      "Por segurança, use uma URL HTTPS.";
-
-    registrar("Frutas: a URL precisa usar HTTPS.");
+  if (!base || !base.startsWith("https://")) {
+    $("fruitHint").textContent = "Informe uma URL base HTTPS válida.";
+    registrar("Frutas: URL HTTPS não configurada.");
     return;
   }
 
   $("fruitButton").disabled = true;
-  $("fruitHint").textContent = "Consultando a API...";
+  $("fruitHint").textContent = "Consultando API configurada...";
 
   try {
-    const tarefas = [
-      consultarJSON(base + "/info/stock")
-    ];
-
+    const tarefas = [consultarJSON(base + "/info/stock")];
     if (fruta) {
-      tarefas.push(
-        consultarJSON(
-          base + "/info/fruits/" + encodeURIComponent(fruta)
-        )
-      );
+      tarefas.push(consultarJSON(
+        base + "/info/fruits/" + encodeURIComponent(fruta)
+      ));
     }
 
     const resultados = await Promise.allSettled(tarefas);
-
     if (resultados[0].status === "fulfilled") {
-      $("fruitStock").textContent = JSON.stringify(
-        resultados[0].value.dados
-      );
-
+      $("fruitStock").textContent =
+        JSON.stringify(resultados[0].value.dados);
       registrar("Stock recebido da API configurada.");
     } else {
-      $("fruitStock").textContent = "Falha na consulta";
-
-      registrar(
-        "Erro no stock: " + resultados[0].reason.message
-      );
+      $("fruitStock").textContent = "Consulta falhou";
+      registrar("Erro no stock: " + resultados[0].reason.message);
     }
 
     if (fruta && resultados[1].status === "fulfilled") {
-      $("fruitInfo").textContent = JSON.stringify(
-        resultados[1].value.dados
-      );
-
-      registrar("Dados da fruta recebidos da API.");
+      $("fruitInfo").textContent =
+        JSON.stringify(resultados[1].value.dados);
+      registrar("Informações da fruta recebidas.");
     } else if (fruta) {
-      $("fruitInfo").textContent = "Falha na consulta";
-
-      registrar(
-        "Erro na fruta: " +
-        (resultados[1]?.reason?.message || "Resposta inválida")
-      );
+      $("fruitInfo").textContent = "Consulta falhou";
+      registrar("Não foi possível consultar a fruta.");
     } else {
       $("fruitInfo").textContent = "Digite uma fruta";
     }
 
     $("fruitHint").textContent =
-      "Consulta concluída. Verifique a origem e a atualização dos dados.";
+      "Verifique se a API aceita CORS e usa esses caminhos.";
   } catch (erro) {
-    $("fruitHint").textContent =
-      "Não foi possível consultar a API: " + erro.message;
-
-    registrar("Erro na integração de frutas: " + erro.message);
+    $("fruitHint").textContent = "Falha na consulta: " + erro.message;
+    registrar("Erro na API de frutas: " + erro.message);
   } finally {
     $("fruitButton").disabled = false;
   }
 }
 
+$("refreshButton").addEventListener("click", atualizarJogo);
+$("demoButton").addEventListener("click", ativarDemo);
+$("profileButton").addEventListener("click", consultarPerfil);
 $("fruitButton").addEventListener("click", consultarFrutas);
+
+registrar("Interface carregada corretamente.");
+atualizarJogo();
+</script>
+</body>
+</html>
