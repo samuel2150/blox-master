@@ -543,10 +543,10 @@ async function atualizarJogo() {
     );
 
     sucessos++;
-  } catch (erro) {
-    $("players").textContent = "Erro de conexão";
-    $("visits").textContent = "Erro de conexão";
-    $("maxPlayers").textContent = "Erro de conexão";
+} catch (erro) {
+    $("players").textContent = erro.message;
+    $("visits").textContent = erro.message;
+    $("maxPlayers").textContent = erro.message;
     $("latency").textContent = "Indisponível";
 
     registrar("ERRO na API do jogo: " + erro.message);
