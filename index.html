@@ -1,0 +1,764 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLOX MASTER | Command Center</title>
+
+<style>
+:root {
+  --bg: #07100e;
+  --panel: #101c18;
+  --border: #284638;
+  --green: #4dff9a;
+  --text: #eafff1;
+  --muted: #9ab5a5;
+  --red: #ff7272;
+  --yellow: #ffd166;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+header {
+  padding: 24px;
+  background: #0b1712;
+  border-bottom: 1px solid var(--border);
+}
+
+h1 {
+  margin: 0;
+  color: var(--green);
+  letter-spacing: 3px;
+  font-size: 32px;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+main {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+button,
+input {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font: inherit;
+}
+
+button {
+  background: var(--green);
+  color: #06110a;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.12);
+}
+
+input {
+  background: #09130f;
+  color: var(--text);
+  min-width: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 14px;
+  min-width: 0;
+}
+
+.label {
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.value {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+h2 {
+  color: var(--green);
+  font-size: 18px;
+  margin-top: 0;
+}
+
+.section {
+  margin-top: 22px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.row input {
+  flex: 1;
+}
+
+.status {
+  color: var(--yellow);
+}
+
+.log {
+  background: #050a08;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 250px;
+  overflow: auto;
+}
+
+footer {
+  color: var(--muted);
+  font-size: 12px;
+  padding: 20px 0;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>BLOX MASTER</h1>
+  <div class="subtitle">
+    ROBLOX INTELLIGENCE SYSTEM • Blox Fruits
+  </div>
+</header>
+
+<main>
+
+  <div class="toolbar">
+    <button id="refreshButton">
+      ATUALIZAR DADOS
+    </button>
+
+    <button id="demoButton">
+      MODO DEMO
+    </button>
+
+    <span id="updateTime" class="hint">
+      Painel iniciado
+    </span>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="label">Jogadores online</div>
+      <div class="value" id="players">Carregando...</div>
+      <div class="hint" id="playersHint">
+        Fonte: Roblox
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Visitas totais</div>
+      <div class="value" id="visits">Carregando...</div>
+      <div class="hint">Visitas públicas do jogo</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Máximo por servidor</div>
+      <div class="value" id="maxPlayers">Carregando...</div>
+      <div class="hint">Capacidade informada pela API</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Latência HTTP</div>
+      <div class="value" id="latency">Aguardando...</div>
+      <div class="hint">Não representa o ping dentro do jogo</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Status do Roblox</div>
+      <div class="value status" id="platformStatus">
+        Consultando...
+      </div>
+      <div class="hint" id="statusHint">
+        Fonte oficial
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Nome do jogo</div>
+      <div class="value" id="gameName" style="font-size:20px">
+        Blox Fruits
+      </div>
+      <div class="hint">Universe ID: 994732206</div>
+    </div>
+
+  </div>
+
+  <section class="section card">
+    <h2>FRUTAS E STOCK</h2>
+
+    <p class="hint">
+      Configure uma API compatível na próxima etapa
+      para consultar os dados disponíveis.
+    </p>
+
+    <div class="row">
+      <input id="fruitApi"
+        placeholder="URL base da API de frutas">
+
+      <input id="fruitName"
+        placeholder="Nome da fruta, ex.: kitsune">
+
+      <button id="fruitButton">
+        CONSULTAR
+      </button>
+    </div>
+
+    <div class="grid section">
+      <div>
+        <div class="label">Stock</div>
+        <div class="value" id="fruitStock">Aguardando</div>
+      </div>
+
+      <div>
+        <div class="label">Informações da fruta</div>
+        <div class="value" id="fruitInfo">Aguardando</div>
+      </div>
+    </div>
+
+    <div class="hint" id="fruitHint">
+      Nenhuma API conectada.
+    </div>
+  </section>
+
+  <section class="section card">
+    <h2>PERFIL PÚBLICO ROBLOX</h2>
+
+    <div class="row">
+      <input id="username"
+        placeholder="Nome de usuário Roblox">
+
+      <button id="profileButton">
+        PESQUISAR
+      </button>
+    </div>
+
+    <p id="profileResult" class="hint">
+      Nenhum perfil consultado.
+    </p>
+  </section>
+
+  <section class="section card">
+    <h2>REGISTRO DE EVENTOS</h2>
+
+    <div class="log" id="eventLog">[SISTEMA] BLOX MASTER iniciado.
+[INFO] Aguardando integração com as fontes de dados.</div>
+  </section>
+
+  <footer>
+    BLOX MASTER • Painel independente de monitoramento.
+    Dados indisponíveis não serão substituídos por números fictícios.
+  </footer>
+
+</main>
+</body>
+</html>
+
+
+<script>
+const $ = id => document.getElementById(id);
+
+function registrar(mensagem) {
+  const log = $("eventLog");
+  const hora = new Date().toLocaleTimeString("pt-BR");
+
+  log.textContent += "\n[" + hora + "] " + mensagem;
+  log.scrollTop = log.scrollHeight;
+}
+
+function numero(valor) {
+  return Number(valor).toLocaleString("pt-BR");
+}
+
+async function consultarJSON(url, opcoes = {}) {
+  const inicio = performance.now();
+
+  const resposta = await fetch(url, {
+    ...opcoes,
+    cache: "no-store"
+  });
+
+  const latencia = Math.round(performance.now() - inicio);
+
+  if (!resposta.ok) {
+    throw new Error("HTTP " + resposta.status);
+  }
+
+  return {
+    dados: await resposta.json(),
+    latencia
+  };
+}
+
+async function atualizarJogo() {
+  const botao = $("refreshButton");
+
+  botao.disabled = true;
+  $("updateTime").textContent = "Consultando fontes reais...";
+
+  let sucessos = 0;
+
+  try {
+    const resultado = await consultarJSON(
+      "https://games.roblox.com/v1/games?universeIds=994732206"
+    );
+
+    const jogo = resultado.dados.data?.[0];
+
+    if (!jogo) {
+      throw new Error("A API não retornou informações do jogo.");
+    }
+
+    $("players").textContent =
+      numero(jogo.playing);
+
+    $("visits").textContent =
+      numero(jogo.visits);
+
+    $("maxPlayers").textContent =
+      numero(jogo.maxPlayers);
+
+    $("latency").textContent =
+      resultado.latencia + " ms";
+
+    $("gameName").textContent =
+      jogo.name || "Blox Fruits";
+
+    $("playersHint").textContent =
+      "Consulta concluída às " +
+      new Date().toLocaleTimeString("pt-BR");
+
+    registrar(
+      "OK: Roblox Games API respondeu. Jogadores online: " +
+      numero(jogo.playing) +
+      ". Latência HTTP: " +
+      resultado.latencia +
+      " ms."
+    );
+
+    sucessos++;
+  } catch (erro) {
+    $("players").textContent = "Erro de conexão";
+    $("visits").textContent = "Erro de conexão";
+    $("maxPlayers").textContent = "Erro de conexão";
+    $("latency").textContent = "Indisponível";
+
+    registrar(
+      "ERRO na API do jogo: " + erro.message +
+      ". Verifique a conexão ou possível bloqueio CORS."
+    );
+  }
+
+  try {
+    const resultado = await consultarJSON(
+      "https://status.roblox.com/api/v2/status.json"
+    );
+
+    const indicador = resultado.dados.status?.indicator;
+
+    const estados = {
+      none: "Operacional",
+      minor: "Problemas menores",
+      major: "Problemas graves",
+      critical: "Falha crítica"
+    };
+
+    $("platformStatus").textContent =
+      estados[indicador] || "Status desconhecido";
+
+    $("statusHint").textContent =
+      "Fonte oficial • HTTP " + resultado.latencia + " ms";
+
+    registrar(
+      "Status oficial do Roblox: " +
+      $("platformStatus").textContent
+    );
+
+    sucessos++;
+  } catch (erro) {
+    $("platformStatus").textContent = "Erro de conexão";
+    $("statusHint").textContent =
+      "Não foi possível consultar o status oficial.";
+
+    registrar(
+      "ERRO no status oficial: " + erro.message
+    );
+  }
+
+  $("updateTime").textContent =
+    sucessos + "/2 fontes consultadas • " +
+    new Date().toLocaleString("pt-BR");
+
+  botao.disabled = false;
+}
+
+$("refreshButton").addEventListener(
+  "click",
+  atualizarJogo
+);
+
+$("demoButton").addEventListener("click", () => {
+  $("players").textContent = "DEMO";
+  $("visits").textContent = "DEMO";
+  $("maxPlayers").textContent = "DEMO";
+  $("latency").textContent = "DEMO";
+  $("platformStatus").textContent = "DEMO";
+  $("updateTime").textContent =
+    "Modo de demonstração, sem dados reais";
+
+  registrar(
+    "Modo DEMO ativado. Os valores reais foram substituídos visualmente."
+  );
+});
+
+atualizarJogo();
+</script>
+</body>
+</html>
+
+
+<script>
+const $ = id => document.getElementById(id);
+
+function registrar(mensagem) {
+  const log = $("eventLog");
+  const hora = new Date().toLocaleTimeString("pt-BR");
+
+  log.textContent += "\n[" + hora + "] " + mensagem;
+  log.scrollTop = log.scrollHeight;
+}
+
+function numero(valor) {
+  return Number(valor).toLocaleString("pt-BR");
+}
+
+async function consultarJSON(url, opcoes = {}) {
+  const inicio = performance.now();
+
+  const resposta = await fetch(url, {
+    ...opcoes,
+    cache: "no-store"
+  });
+
+  const latencia = Math.round(performance.now() - inicio);
+
+  if (!resposta.ok) {
+    throw new Error("HTTP " + resposta.status);
+  }
+
+  return {
+    dados: await resposta.json(),
+    latencia
+  };
+}
+
+async function atualizarJogo() {
+  const botao = $("refreshButton");
+
+  botao.disabled = true;
+  $("updateTime").textContent = "Consultando fontes reais...";
+
+  let sucessos = 0;
+
+  try {
+    const resultado = await consultarJSON(
+      "https://games.roblox.com/v1/games?universeIds=994732206"
+    );
+
+    const jogo = resultado.dados.data?.[0];
+
+    if (!jogo) {
+      throw new Error("A API não retornou informações do jogo.");
+    }
+
+    $("players").textContent = numero(jogo.playing);
+    $("visits").textContent = numero(jogo.visits);
+    $("maxPlayers").textContent = numero(jogo.maxPlayers);
+    $("latency").textContent = resultado.latencia + " ms";
+    $("gameName").textContent = jogo.name || "Blox Fruits";
+
+    $("playersHint").textContent =
+      "Consulta concluída às " +
+      new Date().toLocaleTimeString("pt-BR");
+
+    registrar(
+      "API Roblox OK. Jogadores online: " +
+      numero(jogo.playing) +
+      ". Resposta HTTP: " +
+      resultado.latencia + " ms."
+    );
+
+    sucessos++;
+  } catch (erro) {
+    $("players").textContent = "Erro de conexão";
+    $("visits").textContent = "Erro de conexão";
+    $("maxPlayers").textContent = "Erro de conexão";
+    $("latency").textContent = "Indisponível";
+
+    registrar("ERRO na API do jogo: " + erro.message);
+  }
+
+  try {
+    const resultado = await consultarJSON(
+      "https://status.roblox.com/api/v2/status.json"
+    );
+
+    const indicador = resultado.dados.status?.indicator;
+
+    const estados = {
+      none: "Operacional",
+      minor: "Problemas menores",
+      major: "Problemas graves",
+      critical: "Falha crítica"
+    };
+
+    $("platformStatus").textContent =
+      estados[indicador] || "Status desconhecido";
+
+    $("statusHint").textContent =
+      "Fonte oficial • HTTP " + resultado.latencia + " ms";
+
+    registrar(
+      "Status oficial: " + $("platformStatus").textContent
+    );
+
+    sucessos++;
+  } catch (erro) {
+    $("platformStatus").textContent = "Erro de conexão";
+    $("statusHint").textContent =
+      "Não foi possível consultar o status oficial.";
+
+    registrar("ERRO no status Roblox: " + erro.message);
+  }
+
+  $("updateTime").textContent =
+    sucessos + "/2 fontes consultadas • " +
+    new Date().toLocaleString("pt-BR");
+
+  botao.disabled = false;
+}
+
+async function pesquisarPerfil() {
+  const nome = $("username").value.trim();
+  const resultado = $("profileResult");
+
+  if (!nome) {
+    resultado.textContent = "Digite um nome de usuário.";
+    return;
+  }
+
+  resultado.textContent = "Consultando perfil público...";
+
+  $("profileButton").disabled = true;
+
+  try {
+    const busca = await consultarJSON(
+      "https://users.roblox.com/v1/usernames/users",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          usernames: [nome],
+          excludeBannedUsers: false
+        })
+      }
+    );
+
+    const usuario = busca.dados.data?.[0];
+
+    if (!usuario) {
+      throw new Error("Usuário não encontrado.");
+    }
+
+    const consulta = await consultarJSON(
+      "https://users.roblox.com/v1/users/" + usuario.id
+    );
+
+    const perfil = consulta.dados;
+
+    resultado.textContent =
+      "Nome de exibição: " + (perfil.displayName || usuario.name) +
+      " | Usuário: @" + usuario.name +
+      " | ID: " + usuario.id +
+      " | Criado em: " +
+      (perfil.created
+        ? new Date(perfil.created).toLocaleDateString("pt-BR")
+        : "Não informado") +
+      " | Descrição: " +
+      (perfil.description || "Sem descrição pública.");
+
+    registrar(
+      "Perfil consultado: @" + usuario.name +
+      " (ID " + usuario.id + ")."
+    );
+  } catch (erro) {
+    resultado.textContent =
+      "Falha ao consultar perfil: " + erro.message;
+
+    registrar("ERRO na pesquisa de perfil: " + erro.message);
+  } finally {
+    $("profileButton").disabled = false;
+  }
+}
+
+$("refreshButton").addEventListener("click", atualizarJogo);
+
+$("profileButton").addEventListener("click", pesquisarPerfil);
+
+$("demoButton").addEventListener("click", () => {
+  $("players").textContent = "DEMO";
+  $("visits").textContent = "DEMO";
+  $("maxPlayers").textContent = "DEMO";
+  $("latency").textContent = "DEMO";
+  $("platformStatus").textContent = "DEMO";
+
+  $("updateTime").textContent =
+    "Modo de demonstração, sem dados reais";
+
+  registrar("Modo DEMO ativado.");
+});
+
+atualizarJogo();
+</script>
+</body>
+</html>
+
+
+async function consultarFrutas() {
+  const base = $("fruitApi").value.trim().replace(/\/+$/, "");
+  const fruta = $("fruitName").value.trim().toLowerCase();
+
+  if (!base) {
+    $("fruitHint").textContent =
+      "Configure primeiro a URL de uma API de frutas compatível.";
+
+    registrar("Frutas: nenhuma API configurada.");
+    return;
+  }
+
+  if (!base.startsWith("https://")) {
+    $("fruitHint").textContent =
+      "Por segurança, use uma URL HTTPS.";
+
+    registrar("Frutas: a URL precisa usar HTTPS.");
+    return;
+  }
+
+  $("fruitButton").disabled = true;
+  $("fruitHint").textContent = "Consultando a API...";
+
+  try {
+    const tarefas = [
+      consultarJSON(base + "/info/stock")
+    ];
+
+    if (fruta) {
+      tarefas.push(
+        consultarJSON(
+          base + "/info/fruits/" + encodeURIComponent(fruta)
+        )
+      );
+    }
+
+    const resultados = await Promise.allSettled(tarefas);
+
+    if (resultados[0].status === "fulfilled") {
+      $("fruitStock").textContent = JSON.stringify(
+        resultados[0].value.dados
+      );
+
+      registrar("Stock recebido da API configurada.");
+    } else {
+      $("fruitStock").textContent = "Falha na consulta";
+
+      registrar(
+        "Erro no stock: " + resultados[0].reason.message
+      );
+    }
+
+    if (fruta && resultados[1].status === "fulfilled") {
+      $("fruitInfo").textContent = JSON.stringify(
+        resultados[1].value.dados
+      );
+
+      registrar("Dados da fruta recebidos da API.");
+    } else if (fruta) {
+      $("fruitInfo").textContent = "Falha na consulta";
+
+      registrar(
+        "Erro na fruta: " +
+        (resultados[1]?.reason?.message || "Resposta inválida")
+      );
+    } else {
+      $("fruitInfo").textContent = "Digite uma fruta";
+    }
+
+    $("fruitHint").textContent =
+      "Consulta concluída. Verifique a origem e a atualização dos dados.";
+  } catch (erro) {
+    $("fruitHint").textContent =
+      "Não foi possível consultar a API: " + erro.message;
+
+    registrar("Erro na integração de frutas: " + erro.message);
+  } finally {
+    $("fruitButton").disabled = false;
+  }
+}
+
+$("fruitButton").addEventListener("click", consultarFrutas);
