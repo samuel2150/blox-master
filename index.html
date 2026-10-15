@@ -152,10 +152,16 @@ footer { font-size:12px; padding:20px 0; }
 </main>
 
 <script>
+
 "use strict";
 
 const $ = id => document.getElementById(id);
+
+const API_WORKER =
+  "https://blox-master-api.samvinicius12.workers.dev/api/game";
+
 let modoDemo = false;
+let verificacaoEmAndamento = false;
 
 function registrar(mensagem) {
   const log = $("eventLog");
@@ -165,92 +171,150 @@ function registrar(mensagem) {
 }
 
 function numero(valor) {
+  if (valor == null || !Number.isFinite(Number(valor))) {
+    return "Indisponível";
+  }
   return Number(valor).toLocaleString("pt-BR");
 }
 
 async function consultarJSON(url, opcoes = {}) {
+  const controlador = new AbortController();
+  const temporizador = setTimeout(
+    () => controlador.abort(),
+    8000
+  );
   const inicio = performance.now();
-  const resposta = await fetch(url, {...opcoes, cache:"no-store"});
-  const latencia = Math.round(performance.now() - inicio);
-  if (!resposta.ok) throw new Error("HTTP " + resposta.status);
-  return {dados:await resposta.json(), latencia};
+
+  try {
+    const resposta = await fetch(url, {
+      ...opcoes,
+      cache: "no-store",
+      signal: controlador.signal
+    });
+
+    const latencia = Math.round(performance.now() - inicio);
+    const dados = await resposta.json();
+
+    if (!resposta.ok) {
+      throw new Error(
+        dados.erro || "HTTP " + resposta.status
+      );
+    }
+
+    return { dados, latencia };
+  } catch (erro) {
+    if (erro.name === "AbortError") {
+      throw new Error("Tempo limite de 8 segundos excedido");
+    }
+    throw erro;
+  } finally {
+    clearTimeout(temporizador);
+  }
 }
 
 function limparDemo() {
   modoDemo = false;
   $("players").textContent = "Não consultado";
   $("visits").textContent = "Não consultado";
-  $("maxPlayers").textContent = "Não consultado";
+  $("maxPlayers").textContent = "Não fornecido";
   $("latency").textContent = "Indisponível";
-  $("platformStatus").textContent = "Não verificado";
+  $("platformStatus").textContent = "Consulte a fonte oficial";
   $("gameName").textContent = "Blox Fruits";
-  $("playersHint").textContent = "Aguardando integração";
+  $("playersHint").textContent = "Aguardando consulta real";
+  $("statusHint").innerHTML =
+    '<a href="https://status.roblox.com/" target="_blank" rel="noopener">Abrir status oficial do Roblox</a>';
 }
 
 async function atualizarJogo() {
-  if (modoDemo) limparDemo();
+  if (verificacaoEmAndamento) return;
 
+  verificacaoEmAndamento = true;
+  modoDemo = false;
   $("refreshButton").disabled = true;
-  $("updateTime").textContent = "Verificando conexões...";
-  registrar("Verificação iniciada. Nenhum valor será inventado.");
+  $("updateTime").textContent = "Consultando Worker...";
+  $("playersHint").textContent = "Consulta em andamento";
+
+  registrar("Consulta ao Worker iniciada.");
 
   try {
-    const resultado = await consultarJSON(
-      "https://games.roblox.com/v1/games?universeIds=994732206"
-    );
-    const jogo = resultado.dados.data?.[0];
-    if (!jogo) throw new Error("A API não retornou dados do jogo.");
+    const resultado = await consultarJSON(API_WORKER);
+    const resposta = resultado.dados;
 
-    $("players").textContent = numero(jogo.playing);
-    $("visits").textContent = numero(jogo.visits);
-    $("maxPlayers").textContent = numero(jogo.maxPlayers);
-    $("latency").textContent = resultado.latencia + " ms";
-    $("gameName").textContent = jogo.name || "Blox Fruits";
-    $("playersHint").textContent = "Consulta real concluída.";
-    registrar("API de jogos respondeu com sucesso.");
+    if (!resposta.sucesso || !resposta.jogo) {
+      throw new Error(
+        resposta.erro || "O Worker não retornou dados do jogo."
+      );
+    }
+
+    const jogo = resposta.jogo;
+
+    $("players").textContent = numero(jogo.jogadores);
+    $("visits").textContent = numero(jogo.visitas);
+    $("maxPlayers").textContent =
+      jogo.maxPlayers != null
+        ? numero(jogo.maxPlayers)
+        : "Não fornecido";
+    $("latency").textContent =
+      resultado.latencia + " ms";
+    $("gameName").textContent = jogo.nome || "Blox Fruits";
+    $("playersHint").textContent =
+      "Dados recebidos do Worker.";
+
+    registrar("Consulta ao Worker concluída com sucesso.");
   } catch (erro) {
     $("players").textContent = "Indisponível";
     $("visits").textContent = "Indisponível";
     $("maxPlayers").textContent = "Indisponível";
     $("latency").textContent = "Indisponível";
-    $("playersHint").textContent =
-      "A consulta direta pode estar bloqueada por CORS.";
-    registrar("API de jogos indisponível no navegador: " + erro.message);
-  }
+    $("playersHint").textContent = erro.message;
 
-  $("platformStatus").textContent = "Consulte a fonte oficial";
-  $("statusHint").innerHTML =
-    '<a href="https://status.roblox.com/" target="_blank" rel="noopener">Abrir status oficial do Roblox</a>';
-  $("updateTime").textContent =
-    "Verificação concluída • " + new Date().toLocaleString("pt-BR");
-  $("refreshButton").disabled = false;
+    registrar("Falha na consulta: " + erro.message);
+  } finally {
+    $("platformStatus").textContent = "Consulte a fonte oficial";
+    $("statusHint").innerHTML =
+      '<a href="https://status.roblox.com/" target="_blank" rel="noopener">Abrir status oficial do Roblox</a>';
+
+    $("updateTime").textContent =
+      "Última tentativa: " +
+      new Date().toLocaleTimeString("pt-BR");
+
+    $("refreshButton").disabled = false;
+    verificacaoEmAndamento = false;
+  }
 }
 
 function ativarDemo() {
   modoDemo = true;
+
   $("players").textContent = "DEMO";
   $("visits").textContent = "DEMO";
   $("maxPlayers").textContent = "DEMO";
   $("latency").textContent = "DEMO";
   $("platformStatus").textContent = "DEMO";
   $("gameName").textContent = "Blox Fruits (DEMO)";
-  $("playersHint").textContent = "Valor ilustrativo, não é dado real.";
+  $("playersHint").textContent =
+    "Valores ilustrativos, não são dados reais.";
   $("statusHint").textContent = "Modo de demonstração";
-  $("updateTime").textContent = "MODO DEMO • " + new Date().toLocaleString("pt-BR");
-  registrar("Modo DEMO ativado. Os valores são ilustrativos.");
+  $("updateTime").textContent =
+    "MODO DEMO • " + new Date().toLocaleString("pt-BR");
+
+  registrar("Modo DEMO ativado. Valores ilustrativos.");
 }
 
 async function consultarPerfil() {
   const nome = $("username").value.trim();
-  const saida = $("profileResult");
+
   if (!nome) {
-    saida.textContent = "Digite um nome de usuário.";
+    $("profileResult").textContent =
+      "Digite um nome de usuário.";
     return;
   }
 
-  saida.textContent =
-    "A pesquisa direta de perfil exige uma integração intermediária compatível com a API do Roblox.";
-  registrar("Perfil @" + nome + " não consultado: integração intermediária necessária.");
+  $("profileResult").textContent =
+    "Pesquisa de perfil ainda não integrada. " +
+    "Esta função não consultou a API do Roblox.";
+
+  registrar("Pesquisa de perfil solicitada: @" + nome);
 }
 
 async function consultarFrutas() {
@@ -258,7 +322,8 @@ async function consultarFrutas() {
   const fruta = $("fruitName").value.trim().toLowerCase();
 
   if (!base || !base.startsWith("https://")) {
-    $("fruitHint").textContent = "Informe uma URL base HTTPS válida.";
+    $("fruitHint").textContent =
+      "Informe uma URL base HTTPS válida.";
     registrar("Frutas: URL HTTPS não configurada.");
     return;
   }
@@ -267,39 +332,28 @@ async function consultarFrutas() {
   $("fruitHint").textContent = "Consultando API configurada...";
 
   try {
-    const tarefas = [consultarJSON(base + "/info/stock")];
+    const stock = await consultarJSON(base + "/info/stock");
+    $("fruitStock").textContent =
+      JSON.stringify(stock.dados);
+    registrar("Resposta de stock recebida.");
+
     if (fruta) {
-      tarefas.push(consultarJSON(
+      const info = await consultarJSON(
         base + "/info/fruits/" + encodeURIComponent(fruta)
-      ));
-    }
-
-    const resultados = await Promise.allSettled(tarefas);
-    if (resultados[0].status === "fulfilled") {
-      $("fruitStock").textContent =
-        JSON.stringify(resultados[0].value.dados);
-      registrar("Stock recebido da API configurada.");
-    } else {
-      $("fruitStock").textContent = "Consulta falhou";
-      registrar("Erro no stock: " + resultados[0].reason.message);
-    }
-
-    if (fruta && resultados[1].status === "fulfilled") {
+      );
       $("fruitInfo").textContent =
-        JSON.stringify(resultados[1].value.dados);
-      registrar("Informações da fruta recebidas.");
-    } else if (fruta) {
-      $("fruitInfo").textContent = "Consulta falhou";
-      registrar("Não foi possível consultar a fruta.");
+        JSON.stringify(info.dados);
+      registrar("Resposta de fruta recebida.");
     } else {
       $("fruitInfo").textContent = "Digite uma fruta";
     }
 
     $("fruitHint").textContent =
-      "Verifique se a API aceita CORS e usa esses caminhos.";
+      "Consulta concluída. Confira se a API usa os caminhos esperados.";
   } catch (erro) {
-    $("fruitHint").textContent = "Falha na consulta: " + erro.message;
-    registrar("Erro na API de frutas: " + erro.message);
+    $("fruitHint").textContent =
+      "Falha na consulta: " + erro.message;
+    registrar("Erro na consulta de frutas: " + erro.message);
   } finally {
     $("fruitButton").disabled = false;
   }
@@ -312,6 +366,7 @@ $("fruitButton").addEventListener("click", consultarFrutas);
 
 registrar("Interface carregada corretamente.");
 atualizarJogo();
+
 </script>
 </body>
 </html>
